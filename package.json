@@ -1,0 +1,22 @@
+{
+  "name": "time-planner",
+  "version": "1.0.0",
+  "description": "AI 时间规划器 - 帮助用户高效安排时间",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js"
+  },
+  "keywords": [
+    "time-planner",
+    "ai",
+    "productivity"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^7.1.5"
+  }
+}
