@@ -1481,3 +1481,90 @@ function showNotification(message, type = 'info') {
         }
     }, 3000);
 }
+
+// 导出规划
+function exportPlan(format) {
+    if (!currentPlan) {
+        showNotification('请先生成时间规划', 'error');
+        return;
+    }
+    
+    try {
+        switch (format) {
+            case 'pdf':
+                showNotification('PDF导出功能开发中', 'info');
+                break;
+            case 'ics':
+                showNotification('日历导出功能开发中', 'info');
+                break;
+            case 'markdown':
+                exportAsMarkdown();
+                break;
+            case 'text':
+                exportAsText();
+                break;
+            default:
+                showNotification('不支持的导出格式', 'error');
+        }
+    } catch (error) {
+        console.error('导出失败:', error);
+        showNotification('导出失败：' + error.message, 'error');
+    }
+}
+
+// 导出为Markdown
+function exportAsMarkdown() {
+    if (!currentPlan) return;
+    
+    const markdownContent = `# 时间规划
+
+## 总览
+- 总时长：${Math.floor(currentPlan.totalDuration / 60)} 小时 ${currentPlan.totalDuration % 60} 分钟
+- 生成时间：${new Date().toLocaleString()}
+
+## 详细安排
+
+| 时间 | 任务 | 类型 | 时长 | 备注 |
+|------|------|------|------|------|
+${currentPlan.tasks.map(task => `| ${task.startTime} - ${task.endTime} | ${task.title} | ${task.type === 'break' ? '休息' : (task.taskType === 'fixed' ? '固定' : (task.taskType === 'interval' ? '区间' : '灵活'))} | ${task.duration} 分钟 | ${task.note || '-'} |`).join('\n')}
+`;
+    
+    downloadFile('时间规划.md', markdownContent, 'text/markdown');
+}
+
+// 导出为文本
+function exportAsText() {
+    if (!currentPlan) return;
+    
+    const textContent = `时间规划
+
+总览
+- 总时长：${Math.floor(currentPlan.totalDuration / 60)} 小时 ${currentPlan.totalDuration % 60} 分钟
+- 生成时间：${new Date().toLocaleString()}
+
+详细安排
+
+${currentPlan.tasks.map(task => `${task.startTime} - ${task.endTime} | ${task.title} | ${task.type === 'break' ? '休息' : (task.taskType === 'fixed' ? '固定' : (task.taskType === 'interval' ? '区间' : '灵活'))} | ${task.duration} 分钟 | ${task.note || '-'}`).join('\n')}
+`;
+    
+    downloadFile('时间规划.txt', textContent, 'text/plain');
+}
+
+// 下载文件
+function downloadFile(filename, content, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showNotification('导出成功！', 'success');
+}
+
+// 页面加载完成后初始化
+window.onload = function() {
+    init();
+};
