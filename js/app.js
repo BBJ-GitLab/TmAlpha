@@ -1185,9 +1185,23 @@ function addTask() {
 }
 
 // 快速添加任务
-function addTaskFromModule() {
-    const quickInput = document.querySelector('.quick-task-input');
-    if (!quickInput) return;
+function addTaskFromModule(quickInput) {
+    // 如果没有传入输入框，尝试获取当前模块的输入框
+    if (!quickInput) {
+        // 获取当前活动模块的输入框
+        const activeModuleName = activeModule || 'task';
+        quickInput = document.querySelector(`.${activeModuleName}-module .quick-task-input`);
+        
+        // 如果还是没有找到，获取第一个输入框
+        if (!quickInput) {
+            quickInput = document.querySelector('.quick-task-input');
+        }
+        
+        if (!quickInput) {
+            showNotification('未找到输入框', 'error');
+            return;
+        }
+    }
     
     const title = quickInput.value.trim();
     
