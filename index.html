@@ -6,12 +6,23 @@
     <title>时间规划器 - 做时间的主人</title>
     <link rel="stylesheet" href="css/style.css?v=3">
 </head>
-    <script src="js/app.js?v=10"></script>
 <body>
+    <!-- 启动动画 -->
+    <div class="startup-animation" id="startupAnimation">
+        <div class="animation-content">
+            <div class="animation-logo">⏰</div>
+            <h1 class="animation-title">时间规划器</h1>
+            <p class="animation-subtitle">做时间的主人</p>
+            <div class="animation-progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
        <!--注：本程序没有任何AI功能，完全基于用户输入和程序生成-->
         <!-- 简单登录弹窗 -->
-        <div id="authModal" class="modal" style="display: flex;">
+        <div id="authModal" class="modal" style="display: none;">
             <div class="modal-content">
                 <h2>👋 欢迎使用时间规划器</h2>
                 <p class="modal-subtitle">请输入您的用户名开始规划</p>
@@ -98,6 +109,7 @@
                 <button class="btn-change-role" id="changeRoleBtn">切换角色</button>
                 <button class="btn-logout" id="logoutBtn">退出登录</button>
                 <button class="btn-help" id="helpBtn">帮助</button>
+
             </div>
         </header>
 
@@ -380,6 +392,24 @@
                         <option value="utc">UTC</option>
                     </select>
                 </div>
+                
+                <div class="settings-group">
+                    <label>提醒设置</label>
+                    <div class="reminder-settings">
+                        <div class="reminder-option">
+                            <input type="checkbox" id="enableReminders" class="reminder-checkbox" checked>
+                            <label for="enableReminders">启用任务提醒</label>
+                        </div>
+                        <div class="reminder-option">
+                            <label>提前提醒时间（分钟）</label>
+                            <input type="number" id="reminderMinutes" class="duration-input" min="0" max="60" value="0">
+                        </div>
+                        <div class="reminder-option">
+                            <input type="checkbox" id="enableSound" class="reminder-checkbox">
+                            <label for="enableSound">提醒声音</label>
+                        </div>
+                    </div>
+                </div>
                 <button id="saveAdvancedSettings" class="btn btn-primary">保存设置</button>
             </div>
         </div>
@@ -433,8 +463,7 @@
             </div>
         </div>
 
-        <main class="main-content">
-        </main>
+
 
         <!-- 横屏提醒 -->
         <div class="orientation-warning" id="orientationWarning">
@@ -450,6 +479,26 @@
             <div class="loading-spinner"></div>
             <p>正在为你规划时间...</p>
         </div>
+        
+        <!-- 提醒通知 -->
+        <div class="reminder-notification" id="reminderNotification" style="display: none;">
+            <div class="reminder-content">
+                <div class="reminder-icon">🔔</div>
+                <div class="reminder-info">
+                    <h3>任务提醒</h3>
+                    <p id="reminderTaskName">任务名称</p>
+                    <p id="reminderTaskTime">开始时间: 00:00</p>
+                </div>
+                <div class="reminder-actions">
+                    <button class="btn btn-primary" id="reminderDismiss">关闭</button>
+                    <button class="btn btn-secondary" id="reminderView">查看任务</button>
+                </div>
+            </div>
+        </div>
+        
+
     </div>
+
+    <script src="js/app.js?v=11"></script>
 </body>
 </html>
