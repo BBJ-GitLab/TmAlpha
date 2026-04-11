@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1774076654916",
+    "username": "蓝莓酱",
+    "password": "XIAOLAN/",
+    "createdAt": "2026-03-21T07:04:14.916Z",
+    "settings": {
+      "role": null,
+      "preferences": {
+        "pace": "relaxed",
+        "break": "often",
+        "continuity": "single"
+      }
+    }
+  },
+  {
+    "id": "1774076771833",
+    "username": "test",
+    "password": "123456",
+    "createdAt": "2026-03-21T07:06:11.833Z",
+    "settings": {
+      "role": null,
+      "preferences": {
+        "pace": "relaxed",
+        "break": "often",
+        "continuity": "single"
+      }
+    }
+  }
+]

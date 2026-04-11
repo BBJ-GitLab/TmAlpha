@@ -1,0 +1,171 @@
+/* 全局样式 */
+.container {
+  padding: 20rpx;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* 模态框样式 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  width: 85%;
+  max-width: 500rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 头部 */
+.header {
+  text-align: center;
+  margin-bottom: 30rpx;
+  padding: 30rpx 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  color: white;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+/* 模块栏 */
+.module-bar {
+  display: flex;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+  overflow-x: auto;
+}
+
+.module-btn {
+  flex: 1;
+  min-width: 150rpx;
+  padding: 15rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  font-size: 20rpx;
+  background-color: white;
+}
+
+.module-btn.active {
+  background-color: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* 模块内容 */
+.module-content {
+  background-color: white;
+  border-radius: 20rpx;
+  padding: 25rpx;
+  box-shadow: 0 5rpx 15rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  color: #333;
+}
+
+/* 任务输入 */
+.task-input {
+  padding: 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  font-size: 24rpx;
+  margin-bottom: 15rpx;
+}
+
+/* 按钮样式 */
+.btn {
+  padding: 20rpx 40rpx;
+  border-radius: 10rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #667eea;
+  color: white;
+}
+
+/* 任务列表 */
+.task-list {
+  margin-bottom: 25rpx;
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  margin-bottom: 12rpx;
+  background-color: #f9f9f9;
+}
+
+/* 结果区域 */
+.result-section {
+  margin-top: 25rpx;
+  padding-top: 25rpx;
+  border-top: 2rpx solid #e0e0e0;
+}
+
+.plan-container {
+  margin-bottom: 25rpx;
+  max-height: 500rpx;
+  overflow-y: auto;
+}
+
+.plan-item {
+  display: flex;
+  gap: 15rpx;
+  padding: 18rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  margin-bottom: 12rpx;
+  background-color: #f9f9f9;
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .role-selection {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-options-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* 禁用状态 */
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 性能优化 */
+* {
+  box-sizing: border-box;
+}

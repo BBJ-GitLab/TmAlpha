@@ -1,0 +1,607 @@
+<!-- 时间规划器小程序 -->
+<view class="container">
+  <!-- VIP中心模态框 -->
+  <view class="help-modal" wx:if="{{showVipModal}}">
+    <view class="help-modal-content">
+      <button class="help-modal-close" bindtap="closeVipModal">&times;</button>
+      <text class="help-title">👑 VIP中心</text>
+      
+      <view class="vip-section">
+        <text class="help-section-title">当前状态</text>
+        <view class="vip-status">
+          <text wx:if="{{!isVip}}">您当前不是VIP用户</text>
+          <view wx:else>
+            <text>👑 VIP用户</text>
+            <text>等级：VIP {{vipLevel}}</text>
+            <text>到期时间：{{vipExpiryDate}}</text>
+          </view>
+          <text class="vip-benefit">升级VIP享受更多特权！</text>
+        </view>
+      </view>
+      
+      <view class="vip-section">
+        <text class="help-section-title">VIP特权</text>
+        <view class="vip-benefits-list">
+          <view class="vip-benefit-item">✨ 无限制任务添加</view>
+          <view class="vip-benefit-item">📊 详细的时间分析报告</view>
+          <view class="vip-benefit-item">🎨 个性化主题选择</view>
+          <view class="vip-benefit-item">💾 云端数据同步</view>
+          <view class="vip-benefit-item">⚡ 优先计算时间规划</view>
+          <view class="vip-benefit-item">🎁 专属模板和建议</view>
+        </view>
+      </view>
+      
+      <view class="vip-section">
+        <text class="help-section-title">VIP套餐</text>
+        <view class="vip-plans">
+          <view class="vip-plan">
+            <text class="vip-plan-title">月卡</text>
+            <text class="vip-price">¥19.9/月</text>
+            <button class="btn btn-primary vip-purchase-btn" bindtap="purchaseVip" data-plan="monthly">立即开通</button>
+          </view>
+          <view class="vip-plan vip-plan-popular">
+            <text class="vip-plan-title">年卡</text>
+            <text class="vip-price">¥199/年</text>
+            <text class="vip-saving">（省¥39.8）</text>
+            <button class="btn btn-primary vip-purchase-btn" bindtap="purchaseVip" data-plan="yearly">立即开通</button>
+          </view>
+          <view class="vip-plan">
+            <text class="vip-plan-title">终身卡</text>
+            <text class="vip-price">¥499/终身</text>
+            <button class="btn btn-primary vip-purchase-btn" bindtap="purchaseVip" data-plan="lifetime">立即开通</button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <!-- 简单登录弹窗 -->
+  <view id="authModal" class="modal" wx:if="{{showAuthModal}}">
+    <view class="modal-content">
+      <text class="modal-title">👋 欢迎使用时间规划器</text>
+      <text class="modal-subtitle">请输入您的用户名开始规划</text>
+      
+      <view class="auth-form">
+        <view class="form-group">
+          <text class="form-label">用户名</text>
+          <input type="text" id="usernameInput" placeholder="请输入用户名（2-20个字符）" class="auth-input" bindinput="bindUsernameInput" value="{{username}}"/>
+        </view>
+        <button id="startBtn" class="btn btn-large btn-primary" bindtap="handleStartBtn">开始使用</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 角色选择弹窗 -->
+  <view id="roleModal" class="modal" wx:if="{{showRoleModal}}">
+    <view class="modal-content">
+      <text class="modal-title">👋 欢迎使用时间规划器</text>
+      <text class="modal-subtitle">请选择您的身份，让我们为您量身定制时间规划</text>
+      
+      <view class="role-selection">
+        <view class="role-card" data-role="student" bindtap="selectRole">
+          <view class="role-icon">🎓</view>
+          <text class="role-title">学生</text>
+          <text class="role-desc">专注学习、考试复习、作业安排</text>
+        </view>
+        <view class="role-card" data-role="worker" bindtap="selectRole">
+          <view class="role-icon">💼</view>
+          <text class="role-title">上班族</text>
+          <text class="role-desc">工作任务、会议安排、项目管理</text>
+        </view>
+        <view class="role-card" data-role="freelancer" bindtap="selectRole">
+          <view class="role-icon">🎨</view>
+          <text class="role-title">自由职业</text>
+          <text class="role-desc">灵活时间、创意工作、多任务处理</text>
+        </view>
+        <view class="role-card" data-role="parent" bindtap="selectRole">
+          <view class="role-icon">👨‍👩‍👧</view>
+          <text class="role-title">家长</text>
+          <text class="role-desc">家庭事务、孩子安排、生活平衡</text>
+        </view>
+      </view>
+
+      <view class="preference-section">
+        <text class="preference-title">📊 您的偏好设置</text>
+        <view class="preference-options">
+          <view class="preference-item">
+            <text class="preference-label">工作节奏</text>
+            <view class="preference-buttons">
+              <button class="pref-btn {{pace === 'relaxed' ? 'active' : ''}}" data-pref="pace" data-value="relaxed" bindtap="selectPreference">轻松</button>
+              <button class="pref-btn {{pace === 'balanced' ? 'active' : ''}}" data-pref="pace" data-value="balanced" bindtap="selectPreference">平衡</button>
+              <button class="pref-btn {{pace === 'intensive' ? 'active' : ''}}" data-pref="pace" data-value="intensive" bindtap="selectPreference">紧凑</button>
+            </view>
+          </view>
+          <view class="preference-item">
+            <text class="preference-label">休息频率</text>
+            <view class="preference-buttons">
+              <button class="pref-btn {{breakFreq === 'often' ? 'active' : ''}}" data-pref="break" data-value="often" bindtap="selectPreference">频繁</button>
+              <button class="pref-btn {{breakFreq === 'normal' ? 'active' : ''}}" data-pref="break" data-value="normal" bindtap="selectPreference">正常</button>
+              <button class="pref-btn {{breakFreq === 'rare' ? 'active' : ''}}" data-pref="break" data-value="rare" bindtap="selectPreference">较少</button>
+            </view>
+          </view>
+          <view class="preference-item">
+            <text class="preference-label">任务连续性</text>
+            <view class="preference-buttons">
+              <button class="pref-btn {{continuity === 'single' ? 'active' : ''}}" data-pref="continuity" data-value="single" bindtap="selectPreference">单任务</button>
+              <button class="pref-btn {{continuity === 'mixed' ? 'active' : ''}}" data-pref="continuity" data-value="mixed" bindtap="selectPreference">混合</button>
+              <button class="pref-btn {{continuity === 'batch' ? 'active' : ''}}" data-pref="continuity" data-value="batch" bindtap="selectPreference">批量</button>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <button id="confirmRoleBtn" class="btn btn-large btn-primary" bindtap="confirmRole">开始规划</button>
+    </view>
+  </view>
+
+  <view class="header">
+    <text class="header-title">⏰ 时间规划器</text>
+    <text class="subtitle">让你高效安排时间，做时间的主人</text>
+    <view class="user-info" wx:if="{{isLoggedIn}}">
+      <text class="user-role">{{userRole}}</text>
+      <text class="user-name">{{userName}}</text>
+      <text class="vip-badge" wx:if="{{isVip}}">👑 VIP</text>
+      <button class="btn-change-role" bindtap="changeRole">切换角色</button>
+      <button class="btn-logout" bindtap="logout">退出登录</button>
+      <button class="btn-help" bindtap="showHelp">帮助</button>
+      <button class="btn-vip" bindtap="showVipModal">VIP中心</button>
+    </view>
+  </view>
+
+  <!-- 模块栏 -->
+  <view class="module-bar">
+    <button class="module-btn {{activeModule === 'task' ? 'active' : ''}}" data-module="task" bindtap="switchModule">任务模块</button>
+    <button class="module-btn {{activeModule === 'start' ? 'active' : ''}}" data-module="start" bindtap="switchModule">开始模块</button>
+    <button class="module-btn {{activeModule === 'end' ? 'active' : ''}}" data-module="end" bindtap="switchModule">结束模块</button>
+    <button class="module-btn {{activeModule === 'break' ? 'active' : ''}}" data-module="break" bindtap="switchModule">休息模块</button>
+    <button class="module-btn {{activeModule === 'advanced' ? 'active' : ''}}" data-module="advanced" bindtap="switchModule">高级选项</button>
+  </view>
+
+  <!-- 任务模块 -->
+  <view class="module-content task-module" wx:if="{{activeModule === 'task'}}">
+    <!-- 任务输入区域 -->
+    <view class="input-section">
+      <text class="section-title">📝 输入你的任务</text>
+      <view class="task-input-container">
+        <input 
+          type="text" 
+          id="taskInput" 
+          placeholder="输入任务名称，例如：写作业、运动、阅读..."
+          class="task-input"
+          bindinput="bindTaskInput"
+          value="{{taskTitle}}"
+        >
+        </input>
+        <view class="task-options-row">
+          <view class="task-select-wrapper">
+            <picker id="taskType" class="task-select" range="{{taskTypes}}" range-key="label" value="{{taskTypeIndex}}" bindchange="bindTaskTypeChange">
+              <view class="picker-view">
+                {{taskTypes[taskTypeIndex].label}}
+              </view>
+            </picker>
+          </view>
+          <view class="duration-wrapper">
+            <view class="duration-input-group">
+              <input 
+                type="number" 
+                id="taskDuration" 
+                class="duration-input" 
+                placeholder="时长"
+                bindinput="bindTaskDurationInput"
+                value="{{taskDuration}}"
+              >
+              </input>
+              <picker id="durationUnit" class="duration-unit-select" range="{{durationUnits}}" value="{{durationUnitIndex}}" bindchange="bindDurationUnitChange">
+                <view class="picker-view">
+                  {{durationUnits[durationUnitIndex]}}
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view class="priority-wrapper">
+            <picker id="taskPriority" class="task-select" range="{{priorities}}" value="{{priorityIndex}}" bindchange="bindPriorityChange">
+              <view class="picker-view">
+                {{priorities[priorityIndex]}}
+              </view>
+            </picker>
+          </view>
+        </view>
+        <view class="task-options-row fixed-time-row" wx:if="{{taskTypes[taskTypeIndex].value === 'fixed'}}">
+          <view class="time-input-group">
+            <text class="time-label">开始时间</text>
+            <picker mode="time" id="taskStartTime" class="task-time-input" value="{{taskStartTime}}" bindchange="bindTaskStartTimeChange">
+              <view class="picker-view">
+                {{taskStartTime}}
+              </view>
+            </picker>
+          </view>
+          <view class="time-input-group">
+            <text class="time-label">结束时间</text>
+            <picker mode="time" id="taskEndTime" class="task-time-input" value="{{taskEndTime}}" bindchange="bindTaskEndTimeChange">
+              <view class="picker-view">
+                {{taskEndTime}}
+              </view>
+            </picker>
+          </view>
+        </view>
+        <view class="task-options-row interval-time-row" wx:if="{{taskTypes[taskTypeIndex].value === 'interval'}}">
+          <view class="time-input-group">
+            <text class="time-label">区间开始时间</text>
+            <picker mode="time" id="intervalStartTime" class="task-time-input" value="{{intervalStartTime}}" bindchange="bindIntervalStartTimeChange">
+              <view class="picker-view">
+                {{intervalStartTime}}
+              </view>
+            </picker>
+          </view>
+          <view class="time-input-group">
+            <text class="time-label">区间结束时间</text>
+            <picker mode="time" id="intervalEndTime" class="task-time-input" value="{{intervalEndTime}}" bindchange="bindIntervalEndTimeChange">
+              <view class="picker-view">
+                {{intervalEndTime}}
+              </view>
+            </picker>
+          </view>
+        </view>
+        <view class="task-options-row">
+          <input 
+            type="text" 
+            id="taskNote" 
+            placeholder="备注（可选）"
+            class="task-input-note"
+            bindinput="bindTaskNoteInput"
+            value="{{taskNote}}"
+          >
+          </input>
+          <button id="addTaskBtn" class="btn btn-primary" bindtap="addTask">添加任务</button>
+        </view>
+      </view>
+
+      <!-- 任务列表 -->
+      <view class="task-list" id="taskList">
+        <view class="empty-state" wx:if="{{tasks.length === 0}}">
+          <text>还没有添加任务，开始添加你的第一个任务吧！</text>
+        </view>
+        <view class="task-item" wx:for="{{tasks}}" wx:key="{{item.id}}">
+          <view class="task-info">
+            <text class="task-title">{{item.title}}</text>
+            <text class="task-meta">
+              {{item.duration}}分钟 | {{item.priority === 'high' ? '高' : item.priority === 'medium' ? '中' : '低'}}优先级
+              {{item.type === 'fixed' ? ' | 固定时间' : item.type === 'interval' ? ' | 时间区间' : ' | 灵活时间'}}
+            </text>
+            <text class="task-time" wx:if="{{item.type === 'fixed' && item.startTime && item.endTime}}">
+              🕐 {{item.startTime}} - {{item.endTime}}
+            </text>
+            <text class="task-note" wx:if="{{item.note}}">
+              📝 {{item.note}}
+            </text>
+          </view>
+          <view class="task-actions">
+            <button class="btn-edit" bindtap="editTask" data-id="{{item.id}}">编辑</button>
+            <button class="btn-delete" bindtap="confirmDeleteTask" data-id="{{item.id}}">删除</button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 编辑任务模态框 -->
+      <view class="modal" wx:if="{{showEditModal}}">
+        <view class="modal-content">
+          <text class="modal-title">编辑任务</text>
+          <input 
+            type="text" 
+            placeholder="任务名称" 
+            class="task-input" 
+            bindinput="bindEditTaskInput"
+            value="{{editTaskData.title}}"
+          >
+          </input>
+          <input 
+            type="number" 
+            placeholder="时长（分钟）" 
+            class="duration-input" 
+            bindinput="bindEditTaskDurationInput"
+            value="{{editTaskData.duration}}"
+          >
+          </input>
+          <picker range="{{priorities}}" value="{{editTaskPriorityIndex}}" bindchange="bindEditTaskPriorityChange">
+            <view class="picker-view">
+              {{priorities[editTaskPriorityIndex]}}
+            </view>
+          </picker>
+          <input 
+            type="text" 
+            placeholder="备注（可选）" 
+            class="task-input-note" 
+            bindinput="bindEditTaskNoteInput"
+            value="{{editTaskData.note}}"
+          >
+          </input>
+          <view class="modal-buttons">
+            <button class="btn btn-secondary" bindtap="closeEditModal">取消</button>
+            <button class="btn btn-primary" bindtap="saveEditTask">保存</button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 生成按钮 -->
+      <view class="generate-btn-wrapper">
+        <button id="generatePlanBtn" class="btn btn-large btn-success" bindtap="generatePlan" disabled="{{tasks.length === 0}}">
+          ⏰ 生成时间规划
+        </button>
+      </view>
+    </view>
+
+    <!-- 结果区域 -->
+    <view class="result-section" wx:if="{{showResult}}">
+      <text class="section-title">📊 你的时间规划</text>
+      
+      <!-- 导出按钮组 -->
+      <view class="export-section">
+        <text class="export-label">导出规划：</text>
+        <view class="export-buttons">
+          <button class="btn btn-export btn-export-pdf" bindtap="exportPlan" data-type="pdf" title="导出为PDF">
+            📄 PDF
+          </button>
+          <button class="btn btn-export btn-export-ics" bindtap="exportPlan" data-type="ics" title="导出为日历">
+            📅 日历
+          </button>
+          <button class="btn btn-export btn-export-md" bindtap="exportPlan" data-type="markdown" title="导出为Markdown">
+            📝 Markdown
+          </button>
+          <button class="btn btn-export btn-export-txt" bindtap="exportPlan" data-type="text" title="导出为文本">
+            📋 文本
+          </button>
+        </view>
+      </view>
+      
+      <view class="plan-container">
+        <view class="plan-item" wx:for="{{plan.tasks}}" wx:key="{{index}}">
+          <view class="plan-time">{{item.startTime}} - {{item.endTime}}</view>
+          <view class="plan-content">
+            <text class="plan-title">{{item.title}}</text>
+            <text class="plan-meta">
+              {{item.type === 'break' ? '☕ 休息' : (item.taskType === 'fixed' ? '📌 固定' : '🔄 灵活')}} | {{item.duration}}分钟
+            </text>
+            <text class="plan-note" wx:if="{{item.note}}">{{item.note}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 修改意见 -->
+      <view class="feedback-section">
+        <view class="dev-badge">🚧 功能开发中</view>
+        <textarea 
+          id="feedbackInput" 
+          placeholder="有什么需要修改的地方？例如：把运动时间提前到早上..."
+          class="feedback-input"
+          disabled
+        >
+        </textarea>
+        <button id="modifyPlanBtn" class="btn btn-secondary" disabled>
+          ✨ 修改规划（开发中）
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 开始模块 -->
+  <view class="module-content start-module" wx:if="{{activeModule === 'start'}}">
+    <text class="section-title">🌅 开始模块</text>
+    <view class="module-content-inner">
+      <text>在这里设置你的一天开始时间和初始状态。</text>
+      
+      <!-- 快速添加任务 -->
+      <view class="quick-task-add">
+        <text class="quick-task-title">📝 快速添加任务</text>
+        <input 
+          type="text" 
+          class="quick-task-input" 
+          placeholder="输入任务名称..."
+          bindinput="bindQuickTaskInput"
+          value="{{quickTaskTitle}}"
+          bindconfirm="addTaskFromModule"
+        >
+        </input>
+        <button class="btn btn-primary" bindtap="addTaskFromModule">添加任务</button>
+      </view>
+      
+      <view class="settings-group">
+        <text class="settings-label">每天开始时间</text>
+        <picker mode="time" id="startTimeInput" class="task-time-input" value="{{startTime}}" bindchange="bindStartTimeChange">
+          <view class="picker-view">
+            {{startTime}}
+          </view>
+        </picker>
+      </view>
+      <view class="settings-group">
+        <text class="settings-label">开始时的状态</text>
+        <picker id="startStateSelect" class="task-select" range="{{startStates}}" value="{{startStateIndex}}" bindchange="bindStartStateChange">
+          <view class="picker-view">
+            {{startStates[startStateIndex]}}
+          </view>
+        </picker>
+      </view>
+      <button id="saveStartSettings" class="btn btn-primary" bindtap="saveStartSettings">保存设置</button>
+    </view>
+  </view>
+
+  <!-- 结束模块 -->
+  <view class="module-content end-module" wx:if="{{activeModule === 'end'}}">
+    <text class="section-title">🌙 结束模块</text>
+    <view class="module-content-inner">
+      <text>在这里设置你的一天结束时间和睡前习惯。</text>
+      
+      <!-- 快速添加任务 -->
+      <view class="quick-task-add">
+        <text class="quick-task-title">📝 快速添加任务</text>
+        <input 
+          type="text" 
+          class="quick-task-input" 
+          placeholder="输入任务名称..."
+          bindinput="bindQuickTaskInput"
+          value="{{quickTaskTitle}}"
+          bindconfirm="addTaskFromModule"
+        >
+        </input>
+        <button class="btn btn-primary" bindtap="addTaskFromModule">添加任务</button>
+      </view>
+      
+      <view class="settings-group">
+        <text class="settings-label">每天结束时间</text>
+        <picker mode="time" id="endTimeInput" class="task-time-input" value="{{endTime}}" bindchange="bindEndTimeChange">
+          <view class="picker-view">
+            {{endTime}}
+          </view>
+        </picker>
+      </view>
+      <view class="settings-group">
+        <text class="settings-label">睡前习惯</text>
+        <textarea id="bedtimeRoutine" class="task-input-note" placeholder="例如：阅读30分钟、冥想10分钟..." bindinput="bindBedtimeRoutineInput" value="{{bedtimeRoutine}}">
+        </textarea>
+      </view>
+      <button id="saveEndSettings" class="btn btn-primary" bindtap="saveEndSettings">保存设置</button>
+    </view>
+  </view>
+
+  <!-- 休息模块 -->
+  <view class="module-content break-module" wx:if="{{activeModule === 'break'}}">
+    <text class="section-title">☕ 休息模块</text>
+    <view class="module-content-inner">
+      <text>在这里设置你的休息时间规则。</text>
+      
+      <!-- 快速添加任务 -->
+      <view class="quick-task-add">
+        <text class="quick-task-title">📝 快速添加任务</text>
+        <input 
+          type="text" 
+          class="quick-task-input" 
+          placeholder="输入任务名称..."
+          bindinput="bindQuickTaskInput"
+          value="{{quickTaskTitle}}"
+          bindconfirm="addTaskFromModule"
+        >
+        </input>
+        <button class="btn btn-primary" bindtap="addTaskFromModule">添加任务</button>
+      </view>
+      
+      <view class="settings-group">
+        <text class="settings-label">短休息时长（分钟）</text>
+        <input type="number" id="shortBreakDuration" class="duration-input" placeholder="5" bindinput="bindShortBreakInput" value="{{shortBreakDuration}}">
+        </input>
+      </view>
+      <view class="settings-group">
+        <text class="settings-label">长休息时长（分钟）</text>
+        <input type="number" id="longBreakDuration" class="duration-input" placeholder="15" bindinput="bindLongBreakInput" value="{{longBreakDuration}}">
+        </input>
+      </view>
+      <view class="settings-group">
+        <text class="settings-label">每完成几个任务后长休息</text>
+        <input type="number" id="tasksBeforeLongBreak" class="duration-input" placeholder="5" bindinput="bindTasksBeforeLongBreakInput" value="{{tasksBeforeLongBreak}}">
+        </input>
+      </view>
+      <button id="saveBreakSettings" class="btn btn-primary" bindtap="saveBreakSettings">保存设置</button>
+    </view>
+  </view>
+
+  <!-- 高级选项模块 -->
+  <view class="module-content advanced-module" wx:if="{{activeModule === 'advanced'}}">
+    <text class="section-title">⚙️ 高级选项</text>
+    <view class="module-content-inner">
+      <text>在这里调整高级设置。</text>
+      
+      <!-- 快速添加任务 -->
+      <view class="quick-task-add">
+        <text class="quick-task-title">📝 快速添加任务</text>
+        <input 
+          type="text" 
+          class="quick-task-input" 
+          placeholder="输入任务名称..."
+          bindinput="bindQuickTaskInput"
+          value="{{quickTaskTitle}}"
+          bindconfirm="addTaskFromModule"
+        >
+        </input>
+        <button class="btn btn-primary" bindtap="addTaskFromModule">添加任务</button>
+      </view>
+      
+      <view class="settings-group">
+        <text class="settings-label">时间冲突检测</text>
+        <picker id="conflictDetection" class="task-select" range="{{conflictDetectionOptions}}" value="{{conflictDetectionIndex}}" bindchange="bindConflictDetectionChange">
+          <view class="picker-view">
+            {{conflictDetectionOptions[conflictDetectionIndex]}}
+          </view>
+        </picker>
+      </view>
+      <view class="settings-group">
+        <text class="settings-label">默认任务时长（分钟）</text>
+        <input type="number" id="defaultTaskDuration" class="duration-input" placeholder="60" bindinput="bindDefaultTaskDurationInput" value="{{defaultTaskDuration}}">
+        </input>
+      </view>
+      <view class="settings-group">
+        <text class="settings-label">时区</text>
+        <picker id="timezoneSelect" class="task-select" range="{{timezones}}" value="{{timezoneIndex}}" bindchange="bindTimezoneChange">
+          <view class="picker-view">
+            {{timezones[timezoneIndex]}}
+          </view>
+        </picker>
+      </view>
+      <button id="saveAdvancedSettings" class="btn btn-primary" bindtap="saveAdvancedSettings">保存设置</button>
+    </view>
+  </view>
+
+  <!-- 帮助模态框 -->
+  <view class="help-modal" wx:if="{{showHelpModal}}">
+    <view class="help-modal-content">
+      <button class="help-modal-close" bindtap="closeHelpModal">&times;</button>
+      <text class="help-title">📖 使用帮助</text>
+      
+      <view class="help-section">
+        <text class="help-section-title">基本操作</text>
+        <text class="help-text">1. <strong>添加任务</strong>：在任务模块中输入任务名称，选择任务类型和时长，点击"添加任务"按钮</text>
+        <text class="help-text">2. <strong>生成规划</strong>：添加任务后，点击"生成时间规划"按钮</text>
+        <text class="help-text">3. <strong>查看结果</strong>：规划生成后，在任务模块中查看详细的时间安排</text>
+      </view>
+      
+      <view class="help-section">
+        <text class="help-section-title">任务类型</text>
+        <text class="help-text">• <strong>灵活时间</strong>：系统会自动安排时间，根据优先级和其他任务的时间安排</text>
+        <text class="help-text">• <strong>固定时间</strong>：你可以指定具体的开始和结束时间</text>
+        <text class="help-text">• <strong>时间区间</strong>：在指定的时间段内灵活安排任务</text>
+      </view>
+      
+      <view class="help-section">
+        <text class="help-section-title">优先级设置</text>
+        <text class="help-text">任务优先级分为低、中、高三级：</text>
+        <text class="help-text">• <strong>高优先级</strong>：会优先安排时间</text>
+        <text class="help-text">• <strong>中优先级</strong>：正常安排</text>
+        <text class="help-text">• <strong>低优先级</strong>：会在其他任务安排后再安排</text>
+      </view>
+      
+      <view class="help-section">
+        <text class="help-section-title">时长设置</text>
+        <text class="help-text">你可以设置任务的时长，支持秒、分钟、小时三种单位，范围从1秒到99小时。</text>
+      </view>
+      
+      <view class="help-section">
+        <text class="help-section-title">休息时间</text>
+        <text class="help-text">系统会自动在任务之间插入休息时间：</text>
+        <text class="help-text">• 每个任务后会有5分钟的短休息</text>
+        <text class="help-text">• 每完成5个任务会有15分钟的长休息</text>
+        <text class="help-text">• 午餐和晚餐时间会自动安排休息</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 横屏提醒 -->
+  <view class="orientation-warning" wx:if="{{isLandscape}}">
+    <view class="orientation-content">
+      <view class="orientation-icon">📱</view>
+      <text class="orientation-title">请使用竖屏模式</text>
+      <text class="orientation-text">为了获得最佳体验，请将设备旋转为竖屏</text>
+    </view>
+  </view>
+
+  <!-- 加载动画 -->
+  <view class="loading-overlay" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text>正在为你规划时间...</text>
+  </view>
+</view>
