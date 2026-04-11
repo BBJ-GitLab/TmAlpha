@@ -59,6 +59,16 @@ let defaultTaskDuration = 60;
 let timezones = ['本地时区', 'UTC'];
 let timezoneIndex = 0;
 
+// 提醒设置
+let reminderSettings = {
+    enabled: true,
+    minutes: 0,
+    sound: false
+};
+
+// 提醒定时器
+let reminderTimers = [];
+
 // 结果显示
 let showResult = false;
 let plan = {
@@ -714,6 +724,18 @@ function initElements() {
     authModal = document.getElementById('authModal');
     usernameInput = document.getElementById('usernameInput');
     startBtn = document.getElementById('startBtn');
+    
+
+    
+    // 提醒相关元素
+    enableReminders = document.getElementById('enableReminders');
+    reminderMinutes = document.getElementById('reminderMinutes');
+    enableSound = document.getElementById('enableSound');
+    reminderNotification = document.getElementById('reminderNotification');
+    reminderTaskName = document.getElementById('reminderTaskName');
+    reminderTaskTime = document.getElementById('reminderTaskTime');
+    reminderDismiss = document.getElementById('reminderDismiss');
+    reminderView = document.getElementById('reminderView');
 }
 
 // 横屏检测
@@ -1032,6 +1054,17 @@ function bindEvents() {
     if (defaultTaskDurationInput) defaultTaskDurationInput.addEventListener('input', (e) => defaultTaskDuration = e.target.value);
     if (timezoneSelect) timezoneSelect.addEventListener('change', (e) => timezoneIndex = e.target.value);
     if (saveAdvancedSettings) saveAdvancedSettings.addEventListener('click', saveAdvancedSettingsFunc);
+    
+    // 提醒设置
+    if (enableReminders) enableReminders.addEventListener('change', (e) => reminderSettings.enabled = e.target.checked);
+    if (reminderMinutes) reminderMinutes.addEventListener('input', (e) => reminderSettings.minutes = parseInt(e.target.value));
+    if (enableSound) enableSound.addEventListener('change', (e) => reminderSettings.sound = e.target.checked);
+    
+    // 提醒通知事件
+    if (reminderDismiss) reminderDismiss.addEventListener('click', hideReminderNotification);
+    if (reminderView) reminderView.addEventListener('click', viewReminderTask);
+    
+
 }
 
 // 简单登录（仅用户名）
@@ -1311,6 +1344,12 @@ async function generatePlan() {
         if (resultSection) {
             resultSection.scrollIntoView({ behavior: 'smooth' });
         }
+        
+        // 生成任务提醒
+        if (reminderSettings.enabled) {
+            setupTaskReminders(planResult.tasks);
+        }
+        
         showNotification('时间规划生成成功！', 'success');
     } catch (error) {
         console.error('生成规划失败:', error);
@@ -1445,6 +1484,7 @@ function saveAdvancedSettingsFunc() {
         localStorage.setItem('conflictDetection', conflictDetectionOptions[conflictDetectionIndex]);
         localStorage.setItem('defaultTaskDuration', defaultTaskDuration);
         localStorage.setItem('timezone', timezones[timezoneIndex]);
+        saveReminderSettings();
         showNotification('高级设置保存成功！', 'success');
     } catch (error) {
         showNotification('保存失败，请重试', 'error');
@@ -1578,7 +1618,172 @@ function downloadFile(filename, content, mimeType) {
     showNotification('导出成功！', 'success');
 }
 
+
+
+
+
+// 保存提醒设置
+function saveReminderSettings() {
+    localStorage.setItem('reminderSettings', JSON.stringify(reminderSettings));
+    showNotification('提醒设置已保存', 'success');
+    
+    // 如果启用了提醒，重新设置提醒
+    if (reminderSettings.enabled && currentPlan) {
+        setupTaskReminders(currentPlan.tasks);
+    } else {
+        // 清除所有提醒
+        clearReminders();
+    }
+}
+
+// 加载提醒设置
+function loadReminderSettings() {
+    const savedSettings = localStorage.getItem('reminderSettings');
+    if (savedSettings) {
+        reminderSettings = JSON.parse(savedSettings);
+        
+        // 更新UI
+        if (enableReminders) enableReminders.checked = reminderSettings.enabled;
+        if (reminderMinutes) reminderMinutes.value = reminderSettings.minutes;
+        if (enableSound) enableSound.checked = reminderSettings.sound;
+    }
+}
+
+// 设置任务提醒
+function setupTaskReminders(plannedTasks) {
+    // 清除之前的提醒
+    clearReminders();
+    
+    const now = new Date();
+    const today = new Date().toDateString();
+    
+    plannedTasks.forEach(task => {
+        if (task.type === 'task') {
+            const [hours, minutes] = task.startTime.split(':').map(Number);
+            const taskTime = new Date();
+            taskTime.setHours(hours, minutes, 0, 0);
+            
+            // 确保任务时间是今天的，并且在当前时间之后
+            if (taskTime.toDateString() === today && taskTime > now) {
+                // 计算提醒时间（提前指定分钟数）
+                const reminderTime = new Date(taskTime.getTime() - reminderSettings.minutes * 60000);
+                
+                // 如果提醒时间在当前时间之后
+                if (reminderTime > now) {
+                    const timeUntilReminder = reminderTime.getTime() - now.getTime();
+                    
+                    const timer = setTimeout(() => {
+                        showReminderNotification(task);
+                    }, timeUntilReminder);
+                    
+                    reminderTimers.push(timer);
+                }
+            }
+        }
+    });
+}
+
+// 清除所有提醒
+function clearReminders() {
+    reminderTimers.forEach(timer => clearTimeout(timer));
+    reminderTimers = [];
+}
+
+// 显示提醒通知
+function showReminderNotification(task) {
+    if (reminderNotification && reminderTaskName && reminderTaskTime) {
+        reminderTaskName.textContent = task.title;
+        reminderTaskTime.textContent = `开始时间: ${task.startTime}`;
+        reminderNotification.style.display = 'block';
+        
+        // 给闹钟图标添加摇晃动画
+        const reminderIcon = reminderNotification.querySelector('.reminder-icon');
+        if (reminderIcon) {
+            reminderIcon.classList.add('shake');
+        }
+        
+        // 播放提醒声音
+        if (reminderSettings.sound) {
+            playReminderSound();
+        }
+        
+        // 30秒后自动隐藏
+        setTimeout(hideReminderNotification, 30000);
+    }
+}
+
+// 隐藏提醒通知
+function hideReminderNotification() {
+    if (reminderNotification) {
+        // 移除闹钟图标的摇晃动画
+        const reminderIcon = reminderNotification.querySelector('.reminder-icon');
+        if (reminderIcon) {
+            reminderIcon.classList.remove('shake');
+        }
+        reminderNotification.style.display = 'none';
+    }
+}
+
+// 查看提醒任务
+function viewReminderTask() {
+    // 切换到任务模块
+    const taskModuleBtn = document.querySelector('.module-btn[data-module="task"]');
+    if (taskModuleBtn) {
+        taskModuleBtn.click();
+    }
+    hideReminderNotification();
+}
+
+// 播放提醒声音
+function playReminderSound() {
+    // 创建音频上下文
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // 创建振荡器
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // 设置参数
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.5);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    // 播放
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+}
+
+// 启动动画
+function initStartupAnimation() {
+    const startupAnimation = document.getElementById('startupAnimation');
+    if (startupAnimation) {
+        // 显示启动动画
+        startupAnimation.style.display = 'flex';
+        
+        // 5秒后淡出动画
+        setTimeout(() => {
+            startupAnimation.classList.add('fade-out');
+            
+            // 动画结束后隐藏
+            setTimeout(() => {
+                startupAnimation.style.display = 'none';
+                // 显示登录弹窗
+                document.getElementById('authModal').style.display = 'flex';
+            }, 500);
+        }, 5000);
+    }
+}
+
 // 页面加载完成后初始化
 window.onload = function() {
+    initStartupAnimation();
     init();
+    loadReminderSettings();
 };
+
