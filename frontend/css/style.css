@@ -247,6 +247,7 @@
 }
 
 :root {
+    /* 统一的颜色方案 */
     --watercolor-paper: #f8f6f3;
     --watercolor-blue: rgba(102, 126, 234, 0.5);
     --watercolor-purple: rgba(118, 75, 162, 0.5);
@@ -254,15 +255,51 @@
     --watercolor-green: rgba(40, 167, 69, 0.4);
     --watercolor-orange: rgba(255, 193, 7, 0.4);
     --watercolor-red: rgba(220, 53, 69, 0.4);
+    
+    /* 统一的渐变 */
     --primary-gradient: linear-gradient(135deg, var(--watercolor-blue) 0%, var(--watercolor-purple) 100%);
     --secondary-gradient: linear-gradient(135deg, var(--watercolor-green) 0%, var(--watercolor-blue) 100%);
     --accent-gradient: linear-gradient(135deg, var(--watercolor-pink) 0%, var(--watercolor-orange) 100%);
+    
+    /* 统一的文本颜色 */
     --text-primary: #2c2c2c;
     --text-secondary: #5a5a5a;
+    --text-light: #8a8a8a;
+    
+    /* 统一的阴影 */
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.1);
     --shadow-hover: 0 15px 40px rgba(102, 126, 234, 0.2);
+    --shadow-card: 0 5px 15px rgba(0, 0, 0, 0.08);
+    
+    /* 统一的圆角 */
     --border-radius: 16px;
-    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    
+    /* 统一的过渡 */
+    --transition: all 0.3s ease;
+    --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* 统一的间距 */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
+    
+    /* 统一的边框 */
+    --border-color: rgba(102, 126, 234, 0.2);
+    --border-width: 2px;
+    
+    /* 统一的字体大小 */
+    --font-size-xs: 0.8em;
+    --font-size-sm: 0.9em;
+    --font-size-md: 1em;
+    --font-size-lg: 1.1em;
+    --font-size-xl: 1.3em;
+    --font-size-2xl: 1.5em;
+    --font-size-3xl: 2em;
 }
 
 body {
@@ -773,65 +810,192 @@ h1, h2, h3, h4, h5, h6, p, span, button, input, textarea, select, label {
     }
 }
 
-.btn-change-role, .btn-logout, .btn-help {
+/* 统一按钮样式 */
+.btn {
     background: rgba(102, 126, 234, 0.1);
-    border: 2px solid rgba(102, 126, 234, 0.3);
+    border: var(--border-width) solid var(--border-color);
     color: var(--text-primary);
     padding: 10px 20px;
-    border-radius: 25px;
+    border-radius: var(--border-radius-lg);
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.9em;
-    transition: all 0.3s ease;
-    margin-left: 5px;
+    font-size: var(--font-size-sm);
+    transition: var(--transition);
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    min-width: 100px;
 }
 
-.btn-change-role:hover, .btn-logout:hover, .btn-help:hover {
+.btn:hover {
     background: rgba(102, 126, 234, 0.2);
     border-color: var(--watercolor-blue);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
+.btn-primary {
+    background: var(--primary-gradient);
+    color: var(--text-primary);
+    border-color: rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--watercolor-purple) 0%, var(--watercolor-blue) 100%);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: var(--secondary-gradient);
+    color: var(--text-primary);
+    border-color: rgba(40, 167, 69, 0.4);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, var(--watercolor-blue) 0%, var(--watercolor-green) 100%);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--watercolor-red) 0%, var(--watercolor-orange) 100%);
+    color: var(--text-primary);
+    border-color: rgba(220, 53, 69, 0.4);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, var(--watercolor-orange) 0%, var(--watercolor-red) 100%);
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
+}
+
+/* 按钮大小 */
+.btn-sm {
+    padding: 8px 16px;
+    font-size: var(--font-size-xs);
+    border-radius: var(--border-radius-md);
+}
+
+.btn-md {
+    padding: 10px 20px;
+    font-size: var(--font-size-sm);
+    border-radius: var(--border-radius-lg);
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: var(--font-size-md);
+    border-radius: var(--border-radius-lg);
+}
+
+/* 用户信息按钮 */
+.btn-change-role, .btn-logout, .btn-help {
+    margin-left: var(--spacing-xs);
+}
+
 .btn-change-role {
     margin-left: 0;
 }
 
-/* 任务输入区域样式 */
-.task-input-container {
+/* 统一卡片样式 */
+.card {
     background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,246,243,0.95) 100%);
-    padding: 25px;
     border-radius: var(--border-radius);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
     box-shadow: 
         var(--shadow-soft),
         inset 0 0 30px rgba(102, 126, 234, 0.03);
-    border: 2px solid rgba(102, 126, 234, 0.1);
-    margin-bottom: 20px;
+    border: var(--border-width) solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: 
+        var(--shadow-hover),
+        inset 0 0 40px rgba(102, 126, 234, 0.05);
+    transform: translateY(-2px);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(circle at 30% 30%, var(--watercolor-blue) 0%, transparent 50%);
+    opacity: 0.05;
+    filter: blur(20px);
+    pointer-events: none;
+}
+
+/* 统一输入框样式 */
+.input {
+    width: 100%;
+    padding: 12px 16px;
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-md);
+    background: rgba(255, 255, 255, 0.8);
+    transition: var(--transition);
+    font-family: inherit;
+    color: var(--text-primary);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--watercolor-blue);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.input::placeholder {
+    color: var(--text-light);
+}
+
+/* 统一选择框样式 */
+.select {
+    width: 100%;
+    padding: 12px 16px;
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-md);
+    background: rgba(255, 255, 255, 0.8);
+    transition: var(--transition);
+    font-family: inherit;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--watercolor-blue);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* 任务输入区域样式 */
+.task-input-container {
+    @extend .card;
 }
 
 .task-input {
-    width: 100%;
+    @extend .input;
+    margin-bottom: var(--spacing-lg);
     padding: 16px 20px;
-    border: 2px solid rgba(102, 126, 234, 0.3);
-    border-radius: 25px;
-    font-size: 16px;
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    background: rgba(255,255,255,0.8);
-}
-
-.task-input:focus {
-    outline: none;
-    border-color: var(--watercolor-blue);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    background: white;
+    border-radius: var(--border-radius-lg);
 }
 
 .task-options-row {
     display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
     flex-wrap: wrap;
 }
 
@@ -846,23 +1010,20 @@ h1, h2, h3, h4, h5, h6, p, span, button, input, textarea, select, label {
 .duration-input,
 .duration-unit-select,
 .task-priority-select {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid rgba(102, 126, 234, 0.3);
-    border-radius: 20px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    background: rgba(255,255,255,0.8);
+    @extend .input;
 }
 
-.task-select:focus,
-.duration-input:focus,
-.duration-unit-select:focus,
-.task-priority-select:focus {
-    outline: none;
-    border-color: var(--watercolor-blue);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    background: white;
+.duration-input-group {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.duration-input {
+    flex: 1;
+}
+
+.duration-unit-select {
+    width: 120px;
 }
 
 .duration-input-group {
@@ -1646,26 +1807,26 @@ h1, h2, h3, h4, h5, h6, p, span, button, input, textarea, select, label {
 /* 模块栏样式 */
 .module-bar {
     display: flex;
-    gap: 12px;
-    margin: 20px 0;
-    padding: 15px;
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-md);
     background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,246,243,0.95) 100%);
     border-radius: var(--border-radius);
     box-shadow: 
         var(--shadow-soft),
         inset 0 0 30px rgba(102, 126, 234, 0.03);
-    border: 2px solid rgba(102, 126, 234, 0.1);
+    border: var(--border-width) solid var(--border-color);
     flex-wrap: wrap;
     justify-content: center;
 }
 
 .module-btn {
     padding: 14px 24px;
-    border: 2px solid rgba(102, 126, 234, 0.2);
-    border-radius: 25px;
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-lg);
     background: rgba(255,255,255,0.8);
     color: var(--text-primary);
-    font-size: 14px;
+    font-size: var(--font-size-sm);
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
@@ -1690,8 +1851,8 @@ h1, h2, h3, h4, h5, h6, p, span, button, input, textarea, select, label {
 
 /* 模块内容 */
 .module-content {
-    margin-bottom: 30px;
-    padding: 20px;
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-xl);
     background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,246,243,0.95) 100%);
     backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
@@ -1978,4 +2139,120 @@ h1, h2, h3, h4, h5, h6, p, span, button, input, textarea, select, label {
 .btn-change-role:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* VIP徽章样式 */
+.vip-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #333;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    animation: vipGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes vipGlow {
+    from {
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    }
+    to {
+        box-shadow: 0 4px 16px rgba(255, 215, 0, 0.6);
+    }
+}
+
+/* VIP页面样式 */
+.vip-modal-content {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #ffd700;
+    box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+}
+
+.vip-hero {
+    text-align: center;
+    padding: 30px 0;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
+}
+
+.vip-badge-large {
+    font-size: 2em;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+    animation: vipGlow 2s ease-in-out infinite alternate;
+}
+
+.vip-hero h3 {
+    margin: 10px 0;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.vip-hero p {
+    color: #666;
+    font-size: 1.1em;
+}
+
+.vip-features {
+    margin-bottom: 30px;
+}
+
+.vip-feature {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 215, 0, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid #ffd700;
+    transition: all 0.3s ease;
+}
+
+.vip-feature:hover {
+    background: rgba(255, 215, 0, 0.1);
+    transform: translateX(5px);
+}
+
+.vip-feature-icon {
+    font-size: 1.8em;
+    margin-right: 15px;
+    min-width: 50px;
+    text-align: center;
+}
+
+.vip-feature-content h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.vip-feature-content p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.vip-status {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 8px;
+    border: 1px solid #ffd700;
+}
+
+.vip-status h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+#vipStatusText {
+    margin: 0;
+    font-size: 1.1em;
+    color: #ffd700;
+    font-weight: 600;
 }

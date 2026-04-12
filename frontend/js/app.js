@@ -804,6 +804,22 @@ function hideRoleModal() {
     document.body.style.overflow = 'auto';
 }
 
+// 显示VIP页面
+function showVipModal() {
+    const vipModal = document.getElementById('vipModal');
+    if (vipModal) {
+        vipModal.style.display = 'flex';
+    }
+}
+
+// 关闭VIP页面
+function closeVipModal() {
+    const vipModal = document.getElementById('vipModal');
+    if (vipModal) {
+        vipModal.style.display = 'none';
+    }
+}
+
 // 显示用户信息
 function showUserInfo() {
     if (userProfile.role && roleConfig[userProfile.role]) {
