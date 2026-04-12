@@ -3,6 +3,7 @@
 // 全局状态
 let tasks = [];
 let currentPlan = null;
+let currentPlanData = null;  // 存储当前规划数据
 let currentUser = null;
 let userProfile = {
     role: null,
@@ -12,6 +13,12 @@ let userProfile = {
         continuity: 'single'
     }
 };
+
+// DeepSeek API 密钥
+const DEEPSEEK_API_KEY = 'sk-432d471e52c64d5fb5b4884e27634e5b'; // 已设置用户提供的API密钥
+
+// VIP状态
+let isVIP = false;
 
 // 模块切换
 let activeModule = 'task';
@@ -805,6 +812,13 @@ function showUserInfo() {
         if (currentUser) {
             userName.textContent = `用户: ${currentUser.username}`;
         }
+        
+        // 显示VIP标识
+        const vipBadge = document.getElementById('vipBadge');
+        if (vipBadge) {
+            vipBadge.style.display = isVIP ? 'inline-block' : 'none';
+        }
+        
         userInfo.style.display = 'flex';
     }
 }
@@ -1068,6 +1082,14 @@ function bindEvents() {
 }
 
 // 简单登录（仅用户名）
+// 检查VIP状态
+function checkVIPStatus() {
+    // 这里简化处理，实际项目中可能需要从服务器获取
+    // 暂时设置为true，演示VIP功能
+    isVIP = true;
+    localStorage.setItem('isVIP', 'true');
+}
+
 function simpleLogin() {
     const username = usernameInput.value.trim();
     
@@ -1080,6 +1102,9 @@ function simpleLogin() {
         showNotification('用户名长度应在2-20个字符之间', 'error');
         return;
     }
+    
+    // 检查VIP状态
+    checkVIPStatus();
     
     // 创建用户对象
     currentUser = {
@@ -1359,6 +1384,52 @@ async function generatePlan() {
     }
 }
 
+// 统一渲染函数
+function renderPlanWithData(data) {
+    if (!planContainer) return;
+    
+    // 保存当前规划数据
+    currentPlanData = data;
+    
+    const totalMinutes = data.reduce((sum, item) => sum + item.duration, 0);
+    const totalHours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+    
+    planContainer.innerHTML = `
+        <div class="plan-summary">
+            <h3>📋 总时长：${totalHours > 0 ? totalHours + ' 小时 ' : ''}${remainingMinutes} 分钟</h3>
+        </div>
+        <table class="plan-table">
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>任务</th>
+                    <th>类型</th>
+                    <th>时长</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.map((item, index) => `
+                    <tr class="${item.type === 'break' ? 'row-break' : ''}">
+                        <td class="time-cell">
+                            ${item.time}
+                        </td>
+                        <td class="title-cell">${escapeHtml(item.task)}</td>
+                        <td class="type-cell">
+                            ${item.type === 'break' ? '☕ 休息' : '🔄 任务'}
+                        </td>
+                        <td class="duration-cell">${item.duration} 分钟</td>
+                        <td class="note-cell">${item.note ? escapeHtml(item.note) : '-'}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    
+    console.log('规划渲染完成，任务数量:', data.length);
+}
+
 // 渲染规划
 function renderPlan(planResult) {
     if (!planContainer) return;
@@ -1366,6 +1437,15 @@ function renderPlan(planResult) {
     console.log('开始渲染规划:', planResult);
     const totalHours = Math.floor(planResult.totalDuration / 60);
     const totalMinutes = planResult.totalDuration % 60;
+    
+    // 构建currentPlanData
+    currentPlanData = planResult.tasks.map(task => ({
+        time: `${task.startTime} - ${task.endTime}`,
+        task: task.title,
+        duration: task.duration,
+        type: task.type,
+        note: task.note || ''
+    }));
     
     planContainer.innerHTML = `
         <div class="plan-summary">
@@ -1403,36 +1483,74 @@ function renderPlan(planResult) {
     console.log('规划渲染完成，任务数量:', planResult.tasks.length);
 }
 
-// 修改规划
+// AI 修改规划
 async function modifyPlan() {
     if (!feedbackInput) return;
     
-    const feedback = feedbackInput.value.trim();
+    const userCommand = feedbackInput.value.trim();
     
-    if (!feedback) {
-        showNotification('请输入修改意见', 'error');
+    if (!userCommand) {
+        showNotification('请输入修改指令', 'error');
         return;
     }
 
-    if (!currentPlan) {
-        showNotification('没有可修改的规划', 'error');
+    if (!currentPlanData) {
+        showNotification('请先生成规划', 'error');
+        return;
+    }
+
+    if (!DEEPSEEK_API_KEY || DEEPSEEK_API_KEY === '你的API密钥') {
+        showNotification('请在app.js中设置DeepSeek API密钥', 'error');
         return;
     }
 
     showLoading();
     
     try {
-        // 简化处理：重新生成规划
-        const modifiedPlan = await aiService.generateTimePlan(tasks, userProfile);
+        // 调用 DeepSeek API
+        const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                    {
+                        role: 'system',
+                        content: '你是一个时间规划助手。根据用户指令修改规划数据，只返回修改后的 JSON 数组，每个对象包含 time, task, duration。'
+                    },
+                    {
+                        role: 'user',
+                        content: `当前规划：${JSON.stringify(currentPlanData)}\n指令：${userCommand}\n返回修改后的 JSON 数组。`
+                    }
+                ],
+                temperature: 0.1
+            })
+        });
+
+        if (!res.ok) {
+            throw new Error(`API 请求失败: ${res.status}`);
+        }
+
+        const json = await res.json();
+        let reply = json.choices[0].message.content;
         
-        currentPlan = modifiedPlan;
-        renderPlan(currentPlan);
+        // 提取 JSON 数组
+        const match = reply.match(/\[[\s\S]*\]/);
+        if (match) reply = match[0];
+        
+        const newData = JSON.parse(reply);
+        
+        // 渲染修改后的规划
+        renderPlanWithData(newData);
         feedbackInput.value = '';
         
         if (resultSection) {
             resultSection.scrollIntoView({ behavior: 'smooth' });
         }
-        showNotification('规划已重新生成！', 'success');
+        showNotification('规划已通过AI修改！', 'success');
     } catch (error) {
         console.error('修改规划失败:', error);
         showNotification('修改规划失败：' + error.message, 'error');

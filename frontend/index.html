@@ -106,10 +106,10 @@
             <div class="user-info" id="userInfo" style="display: none;">
                 <span class="user-role" id="userRole"></span>
                 <span class="user-name" id="userName"></span>
+                <span class="vip-badge" id="vipBadge" style="display: none;">⭐ VIP</span>
                 <button class="btn-change-role" id="changeRoleBtn">切换角色</button>
                 <button class="btn-logout" id="logoutBtn">退出登录</button>
                 <button class="btn-help" id="helpBtn">帮助</button>
-
             </div>
         </header>
 
@@ -243,15 +243,13 @@
 
                 <!-- 修改意见 -->
                 <div class="feedback-section">
-                    <div class="dev-badge">🚧 功能开发中</div>
                     <textarea 
                         id="feedbackInput" 
                         placeholder="有什么需要修改的地方？例如：把运动时间提前到早上..."
                         class="feedback-input"
-                        disabled
                     ></textarea>
-                    <button id="modifyPlanBtn" class="btn btn-secondary" disabled>
-                        ✨ 修改规划（开发中）
+                    <button id="modifyPlanBtn" class="btn btn-secondary">
+                        🤖 AI 修改规划
                     </button>
                 </div>
             </section>
